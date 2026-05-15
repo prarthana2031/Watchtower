@@ -1,0 +1,12 @@
+[
+  {
+    "name": "Example",
+    "url": "https://example.com",
+    "readySelector": "h1"
+  },
+  {
+    "name": "Next.js Docs",
+    "url": "https://nextjs.org/docs",
+    "readySelector": "nav"
+  }
+]
