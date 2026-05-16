@@ -2,12 +2,16 @@
   {
     "name": "Example",
     "url": "https://example.com",
-    "readySelector": "h1"
+    "readySelector": "h1",
+    "respectRobotsTxt": true,
+    "maxRequestsPerRun": 2
   },
   {
     "name": "Next.js Docs",
     "url": "https://nextjs.org/docs",
-    "readySelector": "nav"
+    "readySelector": "nav",
+    "respectRobotsTxt": true,
+    "maxRequestsPerRun": 2
   },
   {
   "name": "Stripe Docs",
