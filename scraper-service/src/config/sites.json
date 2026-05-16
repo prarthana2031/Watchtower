@@ -8,5 +8,13 @@
     "name": "Next.js Docs",
     "url": "https://nextjs.org/docs",
     "readySelector": "nav"
-  }
+  },
+  {
+  "name": "Stripe Docs",
+  "url": "https://docs.stripe.com",
+  "readySelector": "nav",
+  "respectRobotsTxt": true,
+  "maxRequestsPerRun": 2
+}
+
 ]
