@@ -9,19 +9,22 @@ async function testShadowDOM() {
     // Navigate to a page with a well-known Shadow DOM element
     await page.goto('https://mdn.github.io/web-components-examples/popup-info-box-web-component/');
     
-    // Try to locate an element inside the shadow root using Playwright's pierce selector
-    // The <popup-info> contains a <span> inside its shadow root.
-    const spanInsideShadow = page.locator('pierce=span');
-    const text = await spanInsideShadow.textContent();
+    // Locate an element inside the shadow root by evaluating the element's shadowRoot
+    // The <popup-info> component contains a <span> inside its shadow root.
+    await page.waitForSelector('popup-info', { timeout: 10000 });
+    const text = await page.locator('popup-info').evaluate((element) => {
+      const shadowRoot = element.shadowRoot;
+      return shadowRoot?.querySelector('span')?.textContent ?? null;
+    });
     log(`Text inside shadow DOM: "${text?.trim()}"`);
     
     // Also try clicking a button inside shadow DOM if exists
     // This specific page doesn't have a button, but we can just verify presence.
     
     if (text && text.length > 0) {
-      log('✅ Shadow DOM piercing works!');
+      log('Shadow DOM piercing works!');
     } else {
-      logError('❌ Could not read content inside shadow DOM.');
+      logError('Shadow DOM test failed. Could not read content inside shadow DOM.');
     }
   } catch (error) {
     logError('Shadow DOM test failed', error);
