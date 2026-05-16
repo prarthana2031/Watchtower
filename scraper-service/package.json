@@ -5,7 +5,7 @@
   "main": "src/index.ts",
   "scripts": {
     "start": "tsx src/index.ts",
-    "shadow-test": "tsx src/shadowDomTest.ts"
+    "shadow-test": "tsx src/shadowdom.ts"
   },
   "keywords": [],
   "author": "",
