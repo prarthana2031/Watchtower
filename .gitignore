@@ -97,3 +97,6 @@ coverage/
 # Local development files
 .local/
 local/
+
+#screenshots
+screenshots/
