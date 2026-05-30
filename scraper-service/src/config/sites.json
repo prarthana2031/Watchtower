@@ -3,6 +3,7 @@
     "name": "Example",
     "url": "https://example.com",
     "readySelector": "h1",
+    "navSelectors": ["body a[href]"],
     "respectRobotsTxt": true,
     "maxRequestsPerRun": 2
   },
@@ -10,15 +11,23 @@
     "name": "Next.js Docs",
     "url": "https://nextjs.org/docs",
     "readySelector": "nav",
+    "navSelectors": [
+      "nav a[href]",
+      "[role='navigation'] a[href]"
+    ],
     "respectRobotsTxt": true,
     "maxRequestsPerRun": 2
   },
   {
-  "name": "Stripe Docs",
-  "url": "https://docs.stripe.com",
-  "readySelector": "nav",
-  "respectRobotsTxt": true,
-  "maxRequestsPerRun": 2
-}
-
+    "name": "Stripe Docs",
+    "url": "https://docs.stripe.com",
+    "readySelector": "nav",
+    "navSelectors": [
+      "nav[aria-label='Main navigation'] a[href]",
+      "nav a[href]",
+      "[role='navigation'] a[href]"
+    ],
+    "respectRobotsTxt": true,
+    "maxRequestsPerRun": 2
+  }
 ]

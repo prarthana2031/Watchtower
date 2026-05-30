@@ -1,0 +1,86 @@
+[
+  {
+    "url": "https://example.com",
+    "sitename": "Example",
+    "domHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "capturedAt": "2026-05-30T15:46:06.496Z",
+    "screenshotpath": "screenshots/example_1780155957555.png"
+  },
+  {
+    "url": "https://nextjs.org/docs",
+    "sitename": "Next.js Docs",
+    "domHash": "8199e5d2cf16c78f1fadc95d01790b65197d17bea7205a94196644a7ce6219e0",
+    "capturedAt": "2026-05-30T15:46:07.835Z",
+    "screenshotpath": "screenshots/next.js_docs_1780155963076.png"
+  },
+  {
+    "url": "https://docs.stripe.com",
+    "sitename": "Stripe Docs",
+    "domHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "capturedAt": "2026-05-30T15:46:37.634Z",
+    "screenshotpath": "screenshots/stripe_docs_1780155963077.png"
+  },
+  {
+    "url": "https://example.com",
+    "sitename": "Example",
+    "domHash": "d25916dbc1c06135f1c96356a9ce5bc9d7fe0be5b285cad404a168bb68d1d542",
+    "capturedAt": "2026-05-30T16:12:56.559Z",
+    "screenshotpath": "screenshots/example_1780157576012.png"
+  },
+  {
+    "url": "https://nextjs.org/docs",
+    "sitename": "Next.js Docs",
+    "domHash": "f4b057e3d1b47ab0cc92a64164ec9986374490de7cee94d701cbead457986c10",
+    "capturedAt": "2026-05-30T16:12:57.814Z",
+    "screenshotpath": "screenshots/next.js_docs_1780157576067.png"
+  },
+  {
+    "url": "https://docs.stripe.com",
+    "sitename": "Stripe Docs",
+    "domHash": "b860d078326991643975f31eabec829ecc0d63a4bc7263d59c01d503ae1459f4",
+    "capturedAt": "2026-05-30T16:13:25.940Z",
+    "screenshotpath": "screenshots/stripe_docs_1780157576198.png"
+  },
+  {
+    "url": "https://example.com",
+    "sitename": "Example",
+    "domHash": "d25916dbc1c06135f1c96356a9ce5bc9d7fe0be5b285cad404a168bb68d1d542",
+    "capturedAt": "2026-05-30T16:13:54.700Z",
+    "screenshotpath": "screenshots/example_1780157634082.png"
+  },
+  {
+    "url": "https://nextjs.org/docs",
+    "sitename": "Next.js Docs",
+    "domHash": "f4b057e3d1b47ab0cc92a64164ec9986374490de7cee94d701cbead457986c10",
+    "capturedAt": "2026-05-30T16:13:56.132Z",
+    "screenshotpath": "screenshots/next.js_docs_1780157634170.png"
+  },
+  {
+    "url": "https://docs.stripe.com",
+    "sitename": "Stripe Docs",
+    "domHash": "b860d078326991643975f31eabec829ecc0d63a4bc7263d59c01d503ae1459f4",
+    "capturedAt": "2026-05-30T16:14:24.111Z",
+    "screenshotpath": "screenshots/stripe_docs_1780157634308.png"
+  },
+  {
+    "url": "https://example.com",
+    "sitename": "Example",
+    "domHash": "d25916dbc1c06135f1c96356a9ce5bc9d7fe0be5b285cad404a168bb68d1d542",
+    "capturedAt": "2026-05-30T16:16:25.285Z",
+    "screenshotpath": "screenshots/example_1780157784358.png"
+  },
+  {
+    "url": "https://nextjs.org/docs",
+    "sitename": "Next.js Docs",
+    "domHash": "f4b057e3d1b47ab0cc92a64164ec9986374490de7cee94d701cbead457986c10",
+    "capturedAt": "2026-05-30T16:16:26.347Z",
+    "screenshotpath": "screenshots/next.js_docs_1780157784421.png"
+  },
+  {
+    "url": "https://docs.stripe.com",
+    "sitename": "Stripe Docs",
+    "domHash": "b860d078326991643975f31eabec829ecc0d63a4bc7263d59c01d503ae1459f4",
+    "capturedAt": "2026-05-30T16:16:54.487Z",
+    "screenshotpath": "screenshots/stripe_docs_1780157784543.png"
+  }
+]
