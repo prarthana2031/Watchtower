@@ -1,249 +1,308 @@
-# Watchtower
+# 🗼 Watchtower
 
-**Automated web monitoring for documentation and product UIs** — capture pages with Playwright, extract navigation structure (including Shadow DOM), detect structural changes via hashing, and persist a full audit trail of screenshots and snapshots.
-
-Built as a hybrid TypeScript monitoring pipeline, designed to grow into visual regression testing, LLM-assisted selector repair, and self-healing Playwright tests.
+> A self-healing UI monitoring system that detects web changes, generates AI-powered test fixes, and opens GitHub PRs — automatically.
 
 ---
 
-## Table of contents
+## What It Does
 
-- [Why Watchtower](#why-watchtower)
-- [Features](#features)
-- [Architecture](#architecture)
-- [Quick start](#quick-start)
-- [Configuration](#configuration)
-- [How it works](#how-it-works)
-- [Project structure](#project-structure)
-- [Scripts](#scripts)
-- [Roadmap](#roadmap)
-- [License](#license)
+Watchtower continuously monitors web pages for structural and visual changes. When a UI breaks your Playwright tests, it uses an LLM to suggest selector repairs, validates the fix in isolation, and opens a pull request — all without human intervention.
+
+**The full loop:** Detect change → identify broken tests → LLM suggests fix → validate fix → open PR.
 
 ---
 
-## Why Watchtower
+## Current Status
 
-Documentation and marketing sites change often. Broken nav links, moved sidebar items, and refactored Web Component layouts break scrapers and Playwright tests silently. Watchtower gives you:
+Watchtower is being built in a 12-week hybrid roadmap. **Phase 1 (core monitoring) is in progress.**
 
-- **Repeatable captures** — headless Chromium, configurable ready selectors, full-page screenshots.
-- **Structural fingerprints** — SHA-256 hashes over normalized navigation link sets, not brittle full-page HTML diffs.
-- **Shadow DOM awareness** — traverses open shadow roots where Cheerio-only parsing fails (Stripe, AWS Console patterns, etc.).
-- **Multi-site runs** — one config file, parallel execution, per-site failure isolation.
-
----
-
-## Features
-
-| Capability | Status |
+| Component | Status |
 | --- | --- |
-| TypeScript + Playwright scraper | ✅ |
-| Config-driven multi-site monitoring | ✅ |
-| Cheerio HTML nav extraction | ✅ |
-| Live DOM + Shadow DOM nav extraction | ✅ |
-| SHA-256 structural change detection | ✅ |
-| JSON snapshot history | ✅ |
-| Full-page screenshots | ✅ |
-| `robots.txt` respect (optional per site) | ✅ |
-| Parallel site processing (`p-limit`) | ✅ |
-| Node.js test suite (`tsx --test`) | ✅ |
-| Visual regression (Pixelmatch / Sharp) | 🔜 Planned |
-| SQLite persistence | 🔜 Planned |
-| DOM noise filtering | 🔜 Planned |
-| GitHub Actions scheduled runs | 🔜 Planned |
-| Python LLM selector repair service | 🔜 Planned |
-| MCP server + Next.js dashboard | 🔜 Planned |
+| TypeScript + Playwright scraping | ✅ Done |
+| Shadow DOM nav extraction | ✅ Done |
+| Cheerio DOM parsing + SHA-256 structural diff | ✅ Done |
+| Multi-site config (`sites.json`) | ✅ Done |
+| JSON snapshot persistence | ✅ Done |
+| SQLite, noise filter, retry logic | ✅ Done |
+| Pixelmatch visual diff + summarizer | ✅ Done |
+| GitHub Actions scheduled runs | ✅ Done |
+| Python LLM repair service | 🚧 Week 6–7 |
+| MCP server + Next.js dashboard | 🚧 Week 8–9 |
+| Validation runner + PR bot + safety tiers | 🚧 Week 10–11 |
 
 ---
 
 ## Architecture
 
-**Current pipeline (Phase 1)**
-
 ```mermaid
-flowchart TB
-  subgraph config [Configuration]
-    sites[sites.json]
-  end
-
-  subgraph runtime [scraper-service]
-    main[index.ts orchestrator]
-    scraper[scraper/ Playwright]
-    structural[differ/structural.ts]
-    db[data/snapshots.json]
-  end
-
-  subgraph outputs [Artifacts]
-    shots[screenshots/]
-    history[snapshot records]
-  end
-
-  sites --> main
-  main --> scraper
-  scraper -->|HTML + live DOM links| structural
-  structural -->|hash compare| main
-  main --> db
-  scraper --> shots
-  db --> history
-```
-
-**Target system (12-week roadmap)**
-
-```mermaid
-flowchart LR
-  TS[TypeScript pipeline] -->|change detected| PY[Python FastAPI /repair]
-  PY -->|candidates| VAL[Validation runner]
-  VAL -->|pass| PR[GitHub PR bot]
-  TS --> DB[(SQLite)]
-  TS --> MCP[MCP server]
-  MCP --> AI[Claude / agents]
-  DB --> UI[Next.js dashboard]
+graph TD
+  A[GitHub Actions · every 6h] --> B[TypeScript Scraper]
+  B --> C[Playwright · headless Chromium]
+  C --> D[DOM Extractor + Noise Filter]
+  D --> E[SHA-256 Hash Comparison]
+  C --> F[Pixelmatch Visual Diff]
+  E --> G[(SQLite Database)]
+  F --> G
+  G --> H{Change Detected?}
+  H -->|Yes| I[Python FastAPI · LLM Service]
+  I --> J[OpenAI / Anthropic API]
+  J --> K[Candidate Selectors + Confidence Scores]
+  K --> L[Validation Runner]
+  L -->|Pass| M[Octokit PR Bot]
+  L -->|Fail| N[Dashboard · Pending Review]
+  G --> O[MCP Server]
+  O --> P[Claude Desktop]
+  G --> Q[Next.js Dashboard]
 ```
 
 ---
 
-## Quick start
+## Features
 
-### Prerequisites
+### 🟢 Phase 1 — Core Monitoring
+- Headless browser scraping via Playwright with Shadow DOM support ✅
+- Structural change detection using SHA-256 hashing of navigation structure ✅
+- Visual regression with Pixelmatch pixel-level comparison + red-highlighted diff images 🚧
+- Noise filtering removes timestamps, avatars, ads, and CSRF tokens to eliminate false positives 🚧
+- SQLite persistence stores full snapshot history 🚧 *(JSON snapshots today)*
+- Multi-site support via `sites.json` config ✅
+- Retry logic with exponential backoff 🚧
 
-- **Node.js** 20+ (LTS recommended)
-- **npm** 9+
+### 🟡 Phase 2 — Automation
+- GitHub Actions runs the full pipeline every 6 hours 🚧
+- Auto-commits screenshots, diffs, and DB updates to the repo 🚧
 
-Playwright downloads Chromium on first install.
+### 🟠 Phase 3 — AI & Observability
+- Python FastAPI microservice calls an LLM to suggest broken selector repairs 🚧
+- Returns 3 ranked candidates with confidence scores, selector strategy, and explanation 🚧
+- TypeScript pipeline calls the repair service automatically after any detected change 🚧
+- MCP server exposes `get_latest_layout` and `get_change_history` tools to Claude Desktop 🚧
+- Next.js dashboard with live site status, change timelines, and side-by-side diff images 🚧
 
-### Install and run
-
-```bash
-git clone https://github.com/YOUR_USERNAME/watchtower.git
-cd watchtower/scraper-service
-
-npm install
-npx playwright install chromium
-
-npm start
-```
-
-On success you will see per-site logs (`CHANGE DETECTED` or `No change`), new files under `scraper-service/screenshots/`, and appended records in `scraper-service/data/snapshots.json`.
-
-### Verify Shadow DOM extraction
-
-```bash
-npm run shadow-test
-```
-
-Exits with code `0` when nav links are found inside a known Shadow DOM fixture.
-
-### Run tests
-
-```bash
-npm test
-```
+### 🔵 Phase 4 — Self-Healing & Safety
+- Validation runner (Docker or GitHub Actions) tests LLM fixes before any PR is opened 🚧
+- Octokit PR bot creates branches and opens PRs with embedded diff images and confidence scores 🚧
+- Tiered automation: high confidence → auto-PR, medium → PR with review label, low → dashboard only 🚧
+- Blast radius limiter: max 3 auto-fixes per run, max 1 file per PR 🚧
+- Circuit breaker: halts LLM calls after 5 consecutive failures 🚧
+- Fix history analytics: track success rates per domain and selector strategy over time 🚧
 
 ---
 
-## Configuration
+## Tech Stack
 
-Monitored sites live in [`scraper-service/src/config/sites.json`](scraper-service/src/config/sites.json).
-
-| Field | Required | Description |
-| --- | --- | --- |
-| `name` | Yes | Display name used in logs and snapshot records |
-| `url` | Yes | Page URL to monitor |
-| `readySelector` | Yes | CSS selector that indicates the page is ready (e.g. `nav`) |
-| `navSelectors` | No | Custom selectors for link extraction; defaults cover `nav`, `[role="navigation"]`, etc. |
-| `pierceShadowDom` | No | Query live DOM + shadow roots (default: `true`) |
-| `respectRobotsTxt` | No | Skip URLs disallowed by `robots.txt` (default: unset → not checked unless `true`) |
-| `maxRequestsPerRun` | No | Reserved for rate limiting (future use) |
-
-**Example entry**
-
-```json
-{
-  "name": "Stripe Docs",
-  "url": "https://docs.stripe.com",
-  "readySelector": "nav",
-  "navSelectors": [
-    "nav[aria-label='Main navigation'] a[href]",
-    "nav a[href]"
-  ],
-  "respectRobotsTxt": true,
-  "pierceShadowDom": true
-}
-```
-
-Invalid entries are skipped with an error log; the rest of the run continues.
+| Layer | Technology |
+| --- | --- |
+| Scraping | TypeScript, Playwright, Cheerio |
+| Storage | SQLite (better-sqlite3) *(planned)* · JSON snapshots *(current)* |
+| Visual Diff | Pixelmatch, Sharp *(planned)* |
+| Automation | GitHub Actions |
+| LLM Service | Python, FastAPI, Pydantic *(planned)* |
+| AI Integration | OpenAI / Anthropic API *(planned)* |
+| Agent Interface | MCP TypeScript SDK *(planned)* |
+| Dashboard | Next.js, Tailwind CSS, shadcn/ui *(planned)* |
+| PR Automation | Octokit, Docker *(planned)* |
 
 ---
 
-## How it works
-
-1. **Load config** — `sites.json` is validated and processed concurrently (up to 5 sites at a time).
-2. **Optional robots check** — when `respectRobotsTxt` is enabled, Watchtower fetches and caches `robots.txt` per origin.
-3. **Capture** — Playwright opens the URL, waits for `readySelector` (with network-idle fallback), saves a full-page PNG, and returns page HTML.
-4. **Extract navigation** — links are collected as `label::href` strings from:
-   - static HTML via **Cheerio**, and
-   - the **live DOM** (including open shadow roots) when `pierceShadowDom` is enabled.
-5. **Hash** — the merged, sorted link set is `JSON.stringify` → **SHA-256**.
-6. **Compare** — the latest snapshot for that URL is loaded from `data/snapshots.json`; hash mismatch → **change detected**.
-7. **Persist** — every run appends a snapshot (hash, timestamp, screenshot path) regardless of change status.
-
----
-
-## Project structure
+## Project Structure
 
 ```
 watchtower/
-├── .github/workflows/
-│   └── monitor.yml          # CI placeholder (scheduled runs planned)
-├── scraper-service/
+├── scraper-service/              # TypeScript monitoring pipeline (Phase 1)
 │   ├── src/
-│   │   ├── index.ts         # Main orchestrator
+│   │   ├── index.ts              # Main loop — processes all sites
+│   │   ├── shadowdom.ts          # Shadow DOM smoke test entry point
 │   │   ├── config/
-│   │   │   └── sites.json   # Monitored URLs
+│   │   │   └── sites.json        # Monitored URL config
 │   │   ├── scraper/
-│   │   │   ├── index.ts     # Playwright capture
-│   │   │   └── shadowNav.ts # Shadow DOM nav extraction
+│   │   │   ├── index.ts          # Playwright browser automation
+│   │   │   └── shadowNav.ts      # Live DOM + shadow root nav extraction
 │   │   ├── differ/
-│   │   │   └── structural.ts
+│   │   │   └── structural.ts     # Cheerio parsing + SHA-256 hashing
 │   │   ├── db/
-│   │   │   └── index.ts     # Snapshot persistence
-│   │   ├── types/
-│   │   ├── utils/
-│   │   └── shadowdom.ts     # Shadow DOM smoke test entry
+│   │   │   └── index.ts          # Snapshot read/write
+│   │   ├── types/                # SiteConfig, Snapshot interfaces
+│   │   └── utils/
+│   │       └── logger.ts
 │   ├── data/
-│   │   └── snapshots.json   # Snapshot history
-│   └── screenshots/         # Captured PNGs (gitignored locally)
+│   │   └── snapshots.json        # Snapshot history
+│   └── screenshots/              # Full-page PNG captures
+├── repair-service/               # Python FastAPI LLM service (planned)
+│   ├── main.py
+│   ├── models.py
+│   └── prompt.py
+├── dashboard/                    # Next.js app (planned)
+│   └── app/
+│       ├── page.tsx
+│       ├── [site]/page.tsx
+│       └── api/
+├── .github/
+│   └── workflows/
+│       ├── monitor.yml           # Scheduled scrape every 6h
+│       └── validate-fix.yml      # On-demand fix validation (planned)
 └── README.md
 ```
 
 ---
 
-## Scripts
+## Setup
 
-All commands run from `scraper-service/`:
+### Prerequisites
+- Node.js 18+
+- Python 3.11+ *(required for LLM repair service — coming in Phase 3)*
+- An OpenAI or Anthropic API key *(required for LLM repair service — coming in Phase 3)*
 
-| Command | Description |
+### 1. Clone and install
+
+```bash
+git clone https://github.com/prarthana2031/Watchtower.git
+cd Watchtower/scraper-service
+npm install
+npx playwright install --with-deps chromium
+```
+
+### 2. Configure sites
+
+Edit `scraper-service/src/config/sites.json`:
+
+```json
+[
+  {
+    "name": "Stripe Docs",
+    "url": "https://docs.stripe.com",
+    "readySelector": "nav",
+    "navSelectors": ["nav a[href]", "[role='navigation'] a[href]"],
+    "respectRobotsTxt": true,
+    "pierceShadowDom": true
+  }
+]
+```
+
+| Field | Description |
 | --- | --- |
-| `npm start` | Run the full monitoring pipeline |
-| `npm test` | Run structural differ unit tests |
-| `npm run shadow-test` | Shadow DOM smoke test |
+| `name` | Display name used in logs and screenshot filenames |
+| `url` | Page to monitor |
+| `readySelector` | CSS selector that indicates the page has loaded |
+| `navSelectors` | Selectors used to extract navigation links for structural diff |
+| `pierceShadowDom` | Extract nav links from shadow roots via live DOM (default `true`) |
+| `respectRobotsTxt` | Skip sites disallowed by `robots.txt` (default `true`) |
+
+### 3. Run the scraper
+
+```bash
+cd scraper-service
+npm start
+```
+
+On each run, Watchtower captures full-page screenshots, extracts navigation links, hashes the structure, compares against the last snapshot, and logs `CHANGE DETECTED` or `No change` per site.
+
+### 4. Run tests
+
+```bash
+npm test
+```
+
+### 5. Verify Shadow DOM support
+
+```bash
+npm run shadow-test
+```
+
+### 6. Start the LLM repair service *(Phase 3 — coming soon)*
+
+```bash
+cd repair-service
+pip install -r requirements.txt
+OPENAI_API_KEY=sk-... uvicorn main:app --port 8000
+```
+
+### 7. Start the dashboard *(Phase 3 — coming soon)*
+
+```bash
+cd dashboard
+npm install
+npm run dev
+# → http://localhost:3000
+```
+
+### 8. Connect to Claude Desktop *(Phase 3 — coming soon)*
+
+Add to `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "watchtower": {
+      "command": "node",
+      "args": ["/absolute/path/to/watchtower/dist/mcp/server.js"]
+    }
+  }
+}
+```
 
 ---
 
-## Roadmap
+## How the Self-Healing Loop Works
 
-Watchtower follows a phased build plan:
+1. **Detect** — Playwright scrapes monitored pages every 6 hours via GitHub Actions
+2. **Diff** — SHA-256 hash comparison (structural) + Pixelmatch (visual) flag changes
+3. **Identify** — The `tests` table maps changed URLs to affected Playwright test files and selectors
+4. **Repair** — The Python service sends old DOM, new DOM, and broken selector to the LLM; receives 3 ranked fix candidates
+5. **Validate** — The fix is run against the live site in an isolated container or GitHub Actions runner
+6. **Ship** — Passing fixes open a PR automatically; failing fixes queue in the dashboard for manual review
 
-| Phase | Focus | Highlights |
+Steps 3–6 are planned for Phases 3–4. Steps 1–2 (structural detection) are working today.
+
+---
+
+## Confidence Tiers
+
+| Confidence | Validation | Action |
 | --- | --- | --- |
-| **1** (current) | Core monitoring | Playwright, structural hashing, multi-site config |
-| **2** | Visual + automation | Pixelmatch diffs, modular refactor, GitHub Actions cron |
-| **3** | AI + observability | FastAPI selector repair, MCP tools, Next.js dashboard |
-| **4** | Self-healing | Validated auto-PRs, confidence tiers, blast-radius limits |
+| High (≥ 0.85) | ✅ Pass | Auto-open PR |
+| Medium (0.60–0.84) | ✅ Pass | Open PR with `needs-review` label |
+| Low (< 0.60) | Any | Dashboard suggestion only |
+| Any | ❌ Fail | Dashboard suggestion only |
 
-Contributions and issues welcome as phases land.
+Maximum 3 auto-fixes per pipeline run. Maximum 1 file changed per PR.
+
+---
+
+## MCP Tools (Claude Desktop)
+
+```
+get_latest_layout(url: string)
+  → Returns the current cleaned DOM structure of a monitored page as Markdown
+
+get_change_history(url: string, limit?: number)
+  → Returns the last N detected changes with timestamps, summaries, and diff image paths
+```
+
+**Example:** Ask Claude — *"Where is the billing link on the Stripe docs right now?"*  
+Claude calls `get_latest_layout`, queries your live snapshot store, and answers with current data.
+
+*(MCP server coming in Phase 3.)*
+
+---
+
+## Production Scaling Path
+
+This project is intentionally built to run on a single machine with zero infrastructure cost. When you're ready to scale:
+
+- **SQLite → PostgreSQL** for concurrent writes and larger datasets
+- **GitHub Actions → dedicated cron workers** (Railway, Render, or a cheap VPS) for more frequent polling
+- **Single process → job queue** (BullMQ + Redis) to parallelize scraping across dozens of sites
+- **Local Docker validation → ephemeral cloud runners** for faster, more isolated test execution
+- **File-based screenshots → object storage** (S3 / R2) as diff image volume grows
+
+---
+
+## Resume Bullet
+
+> Built Watchtower, a self-healing UI monitoring system in TypeScript/Python that detects structural and visual web changes via Playwright + Pixelmatch, uses an LLM to generate ranked selector repair candidates, validates fixes in isolated containers, and automatically opens GitHub PRs — reducing broken-test triage time from hours to zero.
 
 ---
 
 ## License
 
-ISC — see [`scraper-service/package.json`](scraper-service/package.json).
