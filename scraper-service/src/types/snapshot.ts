@@ -8,5 +8,6 @@ export interface snapshot {
     sitename : string;
     domHash : string; /** SHA‑256 hash of the cleaned DOM structure */
     capturedAt : Date;
+    lastUpdated ?: Date;
     screenshotpath : string;
 }

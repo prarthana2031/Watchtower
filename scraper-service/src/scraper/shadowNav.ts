@@ -81,7 +81,7 @@ export async function runShadowDomSmokeTest(): Promise<boolean> {
       }`
     );
 
-    if (text && text.length > 0) {
+    if (text && (text as string).length > 0) {
       log(`Text inside shadow DOM: "${text}"`);
       log('Shadow DOM piercing works!');
       return true;

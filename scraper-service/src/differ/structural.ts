@@ -1,13 +1,13 @@
-/* Parses HTML → structures nav data → hashes → compares hashes. */
+/* Parses HTML → structures nav data → fingerprint (hash) → compares hashes. */
 
 import * as cheerio from 'cheerio';
 import * as crypto from 'crypto';
 
 /** Primary selectors tried on every page (HTML and live DOM). */
 export const DEFAULT_NAV_SELECTORS = [
-  'nav a[href]',
-  '[role="navigation"] a[href]',
+  'nav a[href]', //a[href] → anchor tag having href attribute
   'header nav a[href]',
+  '[role="navigation"] a[href]', 
   'aside nav a[href]',
 ] as const;
 
@@ -23,6 +23,7 @@ export function formatNavLink(text: string, href: string): string {
   return `${normalizedText}::${href}`;
 }
 
+
 export function mergeNavLinks(...groups: string[][]): string[] {
   const seen = new Set<string>();
   for (const group of groups) {
@@ -33,10 +34,7 @@ export function mergeNavLinks(...groups: string[][]): string[] {
   return [...seen].sort();
 }
 
-function collectFromHtml(
-  html: string,
-  selectors: readonly string[]
-): string[] {
+function collectFromHtml(html: string, selectors: readonly string[]): string[] {
   const $ = cheerio.load(html);
   const seen = new Set<string>();
 

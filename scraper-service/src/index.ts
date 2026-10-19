@@ -13,7 +13,7 @@ import {
   hasChanged,
   mergeNavLinks,
 } from './differ/structural.js';
-import { getLatestSnapshot, addSnapshot } from './db/index.js';
+import { addSnapshot, getLatestSnapshot, updateLastChecked } from './db/index.js';
 import { snapshot } from './types/index.js';
 
 const ROBOTS_USER_AGENT = 'watchtower';
@@ -64,14 +64,14 @@ async function processSite(site: SiteConfig): Promise<void> {
   });
 
   if (!result.success) {
-    logError(`❌ Failed to capture ${site.name}`);
+    logError(`Failed to capture ${site.name}`);
     return;
   }
 
   const htmlLinks = extractNavLinksFromHtml(result.html ?? '', navSelectors);
   const navLinks = mergeNavLinks(htmlLinks, result.navLinksFromPage);
   if (navLinks.length === 0) {
-    log(`⚠️ No nav links extracted for ${site.name} — check navSelectors in sites.json`);
+    log(`No nav links extracted for ${site.name} — check navSelectors in sites.json`);
   } else {
     log(`Extracted ${navLinks.length} nav link(s) for ${site.name}`);
   }
@@ -80,20 +80,30 @@ async function processSite(site: SiteConfig): Promise<void> {
   const latest = getLatestSnapshot(site.url);
   const changed = hasChanged(latest?.domHash ?? null, newHash);
 
-  if (changed) {
-    log(`🆕 CHANGE DETECTED for ${site.name}`);
-  } else {
-    log(`✅ No change for ${site.name}`);
-  }
+  const now = new Date();
 
-  const snapshotRecord: snapshot = {
-    url: site.url,
-    sitename: site.name,
-    domHash: newHash,
-    capturedAt: new Date(),
-    screenshotpath: result.screenshotPath,
-  };
-  addSnapshot(snapshotRecord);
+  if (changed) {
+    log(` CHANGE DETECTED for ${site.name}`);
+
+    const snapshotRecord: snapshot = {
+      url: site.url,
+      sitename: site.name,
+      
+      domHash: newHash,
+      capturedAt: now,
+      lastUpdated: now,
+      screenshotpath: result.screenshotPath,
+    };
+    addSnapshot(snapshotRecord);
+  } else {
+    log(`No change for ${site.name}`);
+    updateLastChecked(site.url, now);
+    try {
+      await fs.unlink(result.screenshotPath);
+    } catch {
+      // screenshot may already be missing
+    }
+  }
 }
 
 // ─── Validation ──────────────────────────────────────────────────────────────

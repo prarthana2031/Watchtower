@@ -1,20 +1,20 @@
 # 🗼 Watchtower
 
-> A self-healing UI monitoring system that detects web changes, generates AI-powered test fixes, and opens GitHub PRs — automatically.
+> A local-first browser automation and QA workspace for people and AI agents, built on Watchtower's web-monitoring foundation.
 
 ---
 
 ## What It Does
 
-Watchtower continuously monitors web pages for structural and visual changes. When a UI breaks your Playwright tests, it uses an LLM to suggest selector repairs, validates the fix in isolation, and opens a pull request — all without human intervention.
+Watchtower is growing from a web-monitoring tool into a browser automation platform. The workspace brings repeatable everyday browser tasks and QA checks together, with a path toward safe Playwright execution and agent-controlled workflows.
 
-**The full loop:** Detect change → identify broken tests → LLM suggests fix → validate fix → open PR.
+The existing TypeScript service captures pages and detects structural changes. The new dashboard is the first product stage: organize automation and QA drafts in one local-first workspace. It does not yet execute browser actions.
 
 ---
 
 ## Current Status
 
-Watchtower is being built in a 12-week hybrid roadmap. **Phase 1 (core monitoring) is in progress.**
+Watchtower is being built in stages. The existing monitoring pipeline remains available while the browser automation product takes shape.
 
 | Component | Status |
 | --- | --- |
@@ -26,9 +26,12 @@ Watchtower is being built in a 12-week hybrid roadmap. **Phase 1 (core monitorin
 | SQLite, noise filter, retry logic | ✅ Done |
 | Pixelmatch visual diff + summarizer | ✅ Done |
 | GitHub Actions scheduled runs | ✅ Done |
-| Python LLM repair service | 🚧 Week 6–7 |
-| MCP server + Next.js dashboard | 🚧 Week 8–9 |
-| Validation runner + PR bot + safety tiers | 🚧 Week 10–11 |
+| Monitoring pipeline and Playwright page capture | ✅ Foundation |
+| Unified workflow + QA workspace dashboard | ✅ Stage 1 foundation |
+| Playwright workflow execution and run evidence | ⏳ Stage 2 |
+| QA assertions, suites, and regression results | ⏳ Stage 3 |
+| AI-agent/MCP control, permissions, and integrations | ⏳ Stage 4 |
+| Hosted collaboration, schedules, and safe self-healing | ⏳ Stage 5 |
 
 ---
 
@@ -55,9 +58,24 @@ graph TD
   G --> Q[Next.js Dashboard]
 ```
 
+flowchart LR
+  A[sites.json] --> B[index.ts main]
+  B --> C[scraper/index.ts]
+  C --> D[differ/structural.ts]
+  D --> E[db/index.ts]
+  E --> F[(data/snapshots.json)]
+
+
 ---
 
 ## Features
+
+### Browser automation product roadmap
+- **Stage 1 — Workspace foundation:** responsive dashboard, workflow and QA libraries, local draft creation and search. Browser execution is not included yet.
+- **Stage 2 — Browser runner:** execute a safe, typed set of browser steps with Playwright, capture screenshots, and record run outcomes.
+- **Stage 3 — QA testing:** assertions, reusable test suites, failure details, and regression history built on the same runner.
+- **Stage 4 — Agent integrations:** expose guarded workflow and QA operations to AI agents, starting with MCP and explicit run permissions.
+- **Stage 5 — Reliable automation:** schedules, integrations, collaboration, and carefully gated AI-assisted repair.
 
 ### 🟢 Phase 1 — Core Monitoring
 - Headless browser scraping via Playwright with Shadow DOM support ✅
@@ -100,7 +118,7 @@ graph TD
 | LLM Service | Python, FastAPI, Pydantic *(planned)* |
 | AI Integration | OpenAI / Anthropic API *(planned)* |
 | Agent Interface | MCP TypeScript SDK *(planned)* |
-| Dashboard | Next.js, Tailwind CSS, shadcn/ui *(planned)* |
+| Dashboard | Next.js, React, TypeScript, responsive CSS |
 | PR Automation | Octokit, Docker *(planned)* |
 
 ---
@@ -132,11 +150,12 @@ watchtower/
 │   ├── main.py
 │   ├── models.py
 │   └── prompt.py
-├── dashboard/                    # Next.js app (planned)
-│   └── app/
-│       ├── page.tsx
-│       ├── [site]/page.tsx
-│       └── api/
+├── dashboard/                    # Next.js workflow + QA workspace (Stage 1)
+│   ├── app/
+│   │   ├── page.tsx              # Workspace, workflow library, and QA library
+│   │   ├── globals.css
+│   │   └── layout.tsx
+│   └── package.json
 ├── .github/
 │   └── workflows/
 │       ├── monitor.yml           # Scheduled scrape every 6h
@@ -149,7 +168,7 @@ watchtower/
 ## Setup
 
 ### Prerequisites
-- Node.js 18+
+- Node.js 18.18+
 - Python 3.11+ *(required for LLM repair service — coming in Phase 3)*
 - An OpenAI or Anthropic API key *(required for LLM repair service — coming in Phase 3)*
 
@@ -217,7 +236,7 @@ pip install -r requirements.txt
 OPENAI_API_KEY=sk-... uvicorn main:app --port 8000
 ```
 
-### 7. Start the dashboard *(Phase 3 — coming soon)*
+### 7. Start the dashboard
 
 ```bash
 cd dashboard
@@ -305,4 +324,3 @@ This project is intentionally built to run on a single machine with zero infrast
 ---
 
 ## License
-
