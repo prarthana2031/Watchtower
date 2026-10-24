@@ -8,7 +8,7 @@
 
 Watchtower is growing from a web-monitoring tool into a browser automation platform. The workspace brings repeatable everyday browser tasks and QA checks together, with a path toward safe Playwright execution and agent-controlled workflows.
 
-The existing TypeScript service captures pages and detects structural changes. The new dashboard is the first product stage: organize automation and QA drafts in one local-first workspace. It does not yet execute browser actions.
+The existing TypeScript service captures pages and detects structural changes. The dashboard organizes everyday automation and QA checks; Stage 2 adds a guarded Playwright runner for a small set of reusable browser actions.
 
 ---
 
@@ -28,7 +28,7 @@ Watchtower is being built in stages. The existing monitoring pipeline remains av
 | GitHub Actions scheduled runs | ✅ Done |
 | Monitoring pipeline and Playwright page capture | ✅ Foundation |
 | Unified workflow + QA workspace dashboard | ✅ Stage 1 foundation |
-| Playwright workflow execution and run evidence | ⏳ Stage 2 |
+| Allowlisted Playwright workflow execution and run evidence | ✅ Stage 2 foundation |
 | QA assertions, suites, and regression results | ⏳ Stage 3 |
 | AI-agent/MCP control, permissions, and integrations | ⏳ Stage 4 |
 | Hosted collaboration, schedules, and safe self-healing | ⏳ Stage 5 |
@@ -71,8 +71,8 @@ flowchart LR
 ## Features
 
 ### Browser automation product roadmap
-- **Stage 1 — Workspace foundation:** responsive dashboard, workflow and QA libraries, local draft creation and search. Browser execution is not included yet.
-- **Stage 2 — Browser runner:** execute a safe, typed set of browser steps with Playwright, capture screenshots, and record run outcomes.
+- **Stage 1 — Workspace foundation:** responsive dashboard, workflow and QA libraries, local draft creation and search.
+- **Stage 2 — Browser runner:** run up to 12 typed Playwright steps (`click`, `fill`, `assert visible`, and `assert text`) in a fresh browser session, capture a screenshot, and save run outcomes in the browser's local history.
 - **Stage 3 — QA testing:** assertions, reusable test suites, failure details, and regression history built on the same runner.
 - **Stage 4 — Agent integrations:** expose guarded workflow and QA operations to AI agents, starting with MCP and explicit run permissions.
 - **Stage 5 — Reliable automation:** schedules, integrations, collaboration, and carefully gated AI-assisted repair.
@@ -118,7 +118,7 @@ flowchart LR
 | LLM Service | Python, FastAPI, Pydantic *(planned)* |
 | AI Integration | OpenAI / Anthropic API *(planned)* |
 | Agent Interface | MCP TypeScript SDK *(planned)* |
-| Dashboard | Next.js, React, TypeScript, responsive CSS |
+| Dashboard + runner | Next.js, React, TypeScript, Playwright |
 | PR Automation | Octokit, Docker *(planned)* |
 
 ---
@@ -153,8 +153,11 @@ watchtower/
 ├── dashboard/                    # Next.js workflow + QA workspace (Stage 1)
 │   ├── app/
 │   │   ├── page.tsx              # Workspace, workflow library, and QA library
+│   │   ├── api/
+│   │   │   └── runs/route.ts     # Allowlisted Playwright runner
 │   │   ├── globals.css
 │   │   └── layout.tsx
+│   ├── lib/workflows.ts          # Workflow and run types
 │   └── package.json
 ├── .github/
 │   └── workflows/
@@ -168,7 +171,7 @@ watchtower/
 ## Setup
 
 ### Prerequisites
-- Node.js 18.18+
+- Node.js 22.12+
 - Python 3.11+ *(required for LLM repair service — coming in Phase 3)*
 - An OpenAI or Anthropic API key *(required for LLM repair service — coming in Phase 3)*
 
@@ -240,10 +243,21 @@ OPENAI_API_KEY=sk-... uvicorn main:app --port 8000
 
 ```bash
 cd dashboard
-npm install
+npm ci
+npx playwright install chromium
 npm run dev
 # → http://localhost:3000
 ```
+
+Browser runs are disabled until you explicitly allow the exact hosts the isolated browser may visit. Create `dashboard/.env.local` before starting the dashboard:
+
+```dotenv
+WATCHTOWER_ALLOWED_BROWSER_HOSTS=example.com,docs.example.com
+```
+
+Restart the dashboard after changing the allowlist. Add every required page, redirect, CDN, and WebSocket host separately; hosts are exact-match, and non-default ports must be included (for example, `localhost:3000`). Public DNS results are checked and pinned for each run. Private/reserved network addresses are rejected; `localhost` and `.local` hosts are allowed only in development mode. The runner starts a fresh browser session, does not reuse saved logins, blocks downloads, and never accepts arbitrary JavaScript. Treat clicking a button or filling a form as a real action on the target site.
+
+Stage 2 is a local runner, not a hosted multi-user execution service. Keep the dashboard on a trusted machine and do not expose it to the public internet.
 
 ### 8. Connect to Claude Desktop *(Phase 3 — coming soon)*
 
